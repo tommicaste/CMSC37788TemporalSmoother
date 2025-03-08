@@ -9,13 +9,13 @@ def train_model(model, train_loader, test_loader, lr=0.001, tol=1e-4, num_epochs
     Trains the given model using the provided data loaders.
     
     Args:
-        model (nn.Module): The model to train.
-        train_loader (iterable): DataLoader yielding training batches.
-        test_loader (iterable): DataLoader yielding testing batches.
-        lr (float): Learning rate.
-        tol (float): Tolerance for stopping criterion.
-        num_epochs (int): Maximum number of epochs.
-        checkpoint_path (str): Path to save/load model checkpoints.
+        model  The model to train.
+        train_loader : list of training batches.
+        test_loader : list of testing batches.
+        lr : Learning rate.
+        tol : Tolerance for stopping criterion.
+        num_epochs : Maximum number of epochs.
+        checkpoint_path : Path to save/load model checkpoints.
         
     Returns:
         The trained model.

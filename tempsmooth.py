@@ -18,11 +18,10 @@ class SpatialConvLayer(nn.Module):
     def __init__(self, in_channels, out_channels, conv_operator, activation=nn.ReLU()):
         """
         Args:
-            in_channels (int): Dimension of the input node features.
-            out_channels (int): Dimension of the output node features.
-            conv_operator (nn.Module): A callable GNN operator
-                imported from torch_geometric.nn.
-            activation (callable, optional): Activation function to apply after convolution. Defaults to nn.ReLU().
+            in_channels : Dimension of the input node features
+            out_channels : Dimension of the output node features
+            conv_operator : GNN operator
+            activation : Defaults to ReLU()
         """
         super(SpatialConvLayer, self).__init__()
         self.conv = conv_operator(in_channels, out_channels)
@@ -31,7 +30,7 @@ class SpatialConvLayer(nn.Module):
     def forward(self, x, edge_index):
         # Apply the chosen graph convolution operator
         x = self.conv(x, edge_index)
-        # Apply the activation function, if provided
+        # Apply the activation function
         if self.activation is not None:
             x = self.activation(x)
         return x
@@ -51,10 +50,10 @@ class TemporalTransformer(nn.Module):
     def forward(self, H_tilde, H_prev):
         """
         Args:
-            H_tilde (Tensor): New embeddings at time t, shape [N, embed_dim].
-            H_prev (Tensor): Embeddings from time t-1, shape [N, embed_dim].
+            H_tilde : New embeddings at time t, shape [N, embed_dim]
+            H_prev : Embeddings from time t-1, shape [N, embed_dim]
         Returns:
-            H_out (Tensor): Fused embeddings, shape [N, embed_dim].
+            H_out : Fused embeddings, shape [N, embed_dim]
         """
         # Stack H_prev and H_tilde along the sequence dimension.
         x = torch.stack([H_prev, H_tilde], dim=1)
@@ -71,9 +70,9 @@ class DynamicSpatialTemporalClassifier(nn.Module):
     """
     A joint model that:
       1) Processes a sequence of snapshots via multiple (Conv -> Transformer) layers
-         to produce final node embeddings for the last snapshot.
+         to produce final node embeddings for the last snapshot
       2) Pools the final node embeddings and passes the pooled vector through an MLP
-         to output class logits.
+         to output class logits
     """
     def __init__(
         self,
@@ -128,9 +127,9 @@ class DynamicSpatialTemporalClassifier(nn.Module):
     def forward(self, snapshots):
         """
         Args:
-            snapshots (List[Data]): List of PyG Data objects (each with attributes x and edge_index).
+            snapshots: List of PyGeometric Data objects 
         Returns:
-            logits (Tensor): Classification logits with shape [1, num_classes].
+            logits : Classification logits with shape [1, num_classes]
         """
         # Initialize previous embeddings for each layer.
         prev_embeddings = [None] * self.num_layers
@@ -155,8 +154,6 @@ class DynamicSpatialTemporalClassifier(nn.Module):
             pooled = x.mean(dim=0) 
         elif self.pooling == 'max':
             pooled, _ = x.max(dim=0) 
-        else:
-            raise ValueError("Pooling must be 'mean' or 'max'.")
         pooled = pooled.unsqueeze(0)  # [1, embed_dim]
         h_mlp = self.mlp(pooled)       # [1, mlp_last]
         logits = self.output_layer(h_mlp)  # [1, num_classes]
